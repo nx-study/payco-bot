@@ -1,42 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { utilities, WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
-import * as moment from 'moment';
-
-const env = process.env.NODE_ENV;
-const loggerLever =  env === 'PROD' ? 'info' : 'debug';
+import { ConfigModule } from '@nestjs/config';
+import { WinstonModuleConfig } from './config/logger';
+import { TypeOrmConfig } from './config/typeorm';
 
 @Module({
   imports: [
-    WinstonModule.forRoot({
-      transports: [
-        new winston.transports.Console({  
-          handleExceptions: true,
-          level: loggerLever,
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            utilities.format.nestLike('Payco-bot', {
-                prettyPrint: true,
-            }),
-            winston.format.colorize({ all: true })
-          )
-        }),
-        new winston.transports.File({ 
-          dirname: `./logs`,
-          filename: `${moment(new Date()).format('YYYY-MM-DD')}.log`,
-          level: loggerLever,
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            utilities.format.nestLike('Payco-bot', {
-                prettyPrint: true,
-            })
-          ),
-          maxFiles: 30
-        }),
-      ],
-    })
+    ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV === 'dev' ? 'dev' : 'prod'}`,
+      ignoreEnvFile: process.env.NODE_ENV === 'prod'
+    }), 
+    new WinstonModuleConfig().loggerModule,
+    new TypeOrmConfig().TypeOrmModule,
   ],
   controllers: [AppController],
   providers: [AppService],
