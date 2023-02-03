@@ -20,7 +20,6 @@ export interface IPartyEntity extends IAbstractEntity<PartyDto> {
 }
 
 @Entity({ name: 'party' })
-// @UseDto(UserDto)
 export class PartyEntity extends AbstractEntity<PartyDto, PartyDtoOptions> implements IPartyEntity {
     @Column()
     st: string;
